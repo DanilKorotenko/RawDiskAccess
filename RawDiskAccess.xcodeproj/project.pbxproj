@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DA715AE42FFC14B700C0D466 /* DiskArbitration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA715AE32FFC14B700C0D466 /* DiskArbitration.framework */; };
+		DA715AE62FFC14CA00C0D466 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA715AE52FFC14C900C0D466 /* CoreFoundation.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		DA715AD02FFBF0F500C0D466 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -21,6 +26,8 @@
 /* Begin PBXFileReference section */
 		DA715AD22FFBF0F500C0D466 /* RawDiskAccess */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RawDiskAccess; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA715ADE2FFBF13700C0D466 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DA715AE32FFC14B700C0D466 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = System/Library/Frameworks/DiskArbitration.framework; sourceTree = SDKROOT; };
+		DA715AE52FFC14C900C0D466 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -36,6 +43,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA715AE62FFC14CA00C0D466 /* CoreFoundation.framework in Frameworks */,
+				DA715AE42FFC14B700C0D466 /* DiskArbitration.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +56,7 @@
 			children = (
 				DA715ADE2FFBF13700C0D466 /* README.md */,
 				DA715AD42FFBF0F500C0D466 /* RawDiskAccess */,
+				DA715AE22FFC14B700C0D466 /* Frameworks */,
 				DA715AD32FFBF0F500C0D466 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,6 +67,15 @@
 				DA715AD22FFBF0F500C0D466 /* RawDiskAccess */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DA715AE22FFC14B700C0D466 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DA715AE52FFC14C900C0D466 /* CoreFoundation.framework */,
+				DA715AE32FFC14B700C0D466 /* DiskArbitration.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
