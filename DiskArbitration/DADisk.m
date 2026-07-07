@@ -35,7 +35,10 @@ static NSMutableDictionary *uniqueDisks = nil;
 
 @property (readonly) DADisk *    parentDisk;
 
+@property (readonly) NSString * _Nullable bsdName;
 @property (readonly) NSString *  parentBsdName;
+
+@property (readonly) NSDictionary *ioMediaProperties;
 
 @end
 
@@ -63,6 +66,8 @@ static NSMutableDictionary *uniqueDisks = nil;
 @synthesize parentDisk;
 @synthesize bsdName;
 @synthesize parentBsdName;
+@synthesize ioMediaProperties;
+@synthesize offset;
 
 #pragma mark -
 
@@ -231,13 +236,14 @@ static NSMutableDictionary *uniqueDisks = nil;
     return deviceMediaName;
 }
 
-- (NSString *)bsdName
+- (NSInteger)offset
 {
-    if (nil == bsdName)
+    if (0 == offset)
     {
-        bsdName = [NSString stringWithUTF8String:DADiskGetBSDName(self.diskRef)];
+        NSNumber *offsetNum = [self.ioMediaProperties objectForKey:@"Base"];
+        offset = offsetNum.integerValue;
     }
-    return bsdName;
+    return offset;
 }
 
 #pragma mark Public Methods
@@ -462,6 +468,15 @@ static NSMutableDictionary *uniqueDisks = nil;
     return parentDisk;
 }
 
+- (NSString *)bsdName
+{
+    if (nil == bsdName)
+    {
+        bsdName = [NSString stringWithUTF8String:DADiskGetBSDName(self.diskRef)];
+    }
+    return bsdName;
+}
+
 - (NSString *)parentBsdName
 {
     if (nil == parentBsdName)
@@ -469,6 +484,21 @@ static NSMutableDictionary *uniqueDisks = nil;
         parentBsdName = self.parentDisk.bsdName;
     }
     return parentBsdName;
+}
+
+- (NSDictionary *)ioMediaProperties
+{
+    if (nil == ioMediaProperties)
+    {
+        io_service_t io = DADiskCopyIOMedia(self.diskRef);
+        CFMutableDictionaryRef ioDict = NULL;
+        if (IORegistryEntryCreateCFProperties(io, &ioDict, kCFAllocatorDefault, 0) == kIOReturnSuccess)
+        {
+            ioMediaProperties = (NSDictionary *)CFBridgingRelease(ioDict);
+        }
+        IOObjectRelease(io);
+    }
+    return ioMediaProperties;
 }
 
 @end

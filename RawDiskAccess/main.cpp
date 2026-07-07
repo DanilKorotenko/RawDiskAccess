@@ -27,8 +27,7 @@ int main(int argc, const char * argv[])
             std::string uuid = DiskGetUUID(aDisk);
             std::cout << uuid << std::endl;
 
-            std::string bsdName = DiskGetBsdName(aDisk);
-            std::cout << bsdName << std::endl;
+            std::cout << DiskGetOffset(aDisk) << std::endl;
 
         });
 

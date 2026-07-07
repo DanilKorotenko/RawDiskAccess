@@ -113,9 +113,9 @@ DiskType DiskGetType(DiskRef aDisk)
     return result;
 }
 
-std::string DiskGetBsdName(DiskRef aDisk)
+int64_t DiskGetOffset(DiskRef aDisk)
 {
-    std::string result;
+    int64_t result = 0;
     @autoreleasepool
     {
         if (aDisk == NULL || aDisk->_dadisk == NULL)
@@ -123,7 +123,7 @@ std::string DiskGetBsdName(DiskRef aDisk)
             return result;
         }
         DADisk *daDisk = (__bridge DADisk *)aDisk->_dadisk;
-        result = GetSafeUTF8String(daDisk.bsdName);
+        result = daDisk.offset;
     }
     return result;
 }
