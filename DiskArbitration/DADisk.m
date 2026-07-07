@@ -35,6 +35,8 @@ static NSMutableDictionary *uniqueDisks = nil;
 
 @property (readonly) DADisk *    parentDisk;
 
+@property (readonly) NSString *  parentBsdName;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +62,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @synthesize mountFlags;
 @synthesize parentDisk;
 @synthesize bsdName;
+@synthesize parentBsdName;
 
 #pragma mark -
 
@@ -457,6 +460,15 @@ static NSMutableDictionary *uniqueDisks = nil;
         }
     }
     return parentDisk;
+}
+
+- (NSString *)parentBsdName
+{
+    if (nil == parentBsdName)
+    {
+        parentBsdName = self.parentDisk.bsdName;
+    }
+    return parentBsdName;
 }
 
 @end
