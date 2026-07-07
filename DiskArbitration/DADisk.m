@@ -28,15 +28,8 @@ static NSMutableDictionary *uniqueDisks = nil;
 @property (readonly) NSString *  deviceProtocol;
 @property (readonly) NSString *  mediaKind;
 @property (readonly) NSString *  volumeKind;
-@property (readonly) BOOL        isAutoFS;
 
 @property (readonly) DADiskRef   diskRef;
-
-@property (readonly) BOOL        isUSB;
-@property (readonly) BOOL        isSDCard;
-
-@property (readonly) BOOL        isValidRemovable;
-@property (readonly) BOOL        isValidNetwork;
 
 @property (readonly) NSInteger   mountFlags;
 
@@ -112,7 +105,7 @@ static NSMutableDictionary *uniqueDisks = nil;
     return [descriptionDictionary description];
 }
 
-#pragma mark -
+#pragma mark Public Properties
 
 - (BOOL)isWholeDisk
 {
@@ -132,13 +125,6 @@ static NSMutableDictionary *uniqueDisks = nil;
     BOOL value = [[self.diskDescription
         objectForKey:(NSString *)kDADiskDescriptionMediaLeafKey] boolValue];
     return value;
-}
-
-- (BOOL)isUSB
-{
-    BOOL isUSB = [self.deviceProtocol isEqualToString:
-        @kIOPropertyPhysicalInterconnectTypeUSB];
-    return isUSB;
 }
 
 - (BOOL)isSDCard
@@ -191,57 +177,6 @@ static NSMutableDictionary *uniqueDisks = nil;
 - (BOOL)isValidForProcessing
 {
     return self.isValidRemovable || self.isValidNetwork;
-}
-
-- (NSString *)mediaName
-{
-    if (mediaName == nil)
-    {
-        mediaName = [self.diskDescription objectForKey:(NSString *)kDADiskDescriptionMediaNameKey];
-    }
-    return mediaName;
-}
-
-- (NSString *)mediaUUID
-{
-    if (mediaUUID == nil)
-    {
-        CFUUIDRef valueRef = (__bridge CFUUIDRef)([self.diskDescription
-            objectForKey:(NSString *)kDADiskDescriptionMediaUUIDKey]);
-        if (valueRef != NULL)
-        {
-            CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, valueRef);
-            mediaUUID = CFBridgingRelease(uuidStringRef);
-        }
-    }
-    return mediaUUID;
-}
-
-- (NSString *)mediaContentUUID
-{
-    if (mediaContentUUID == nil)
-    {
-        NSString *uuidStr = [self.diskDescription
-            objectForKey:(NSString *)kDADiskDescriptionMediaContentKey];
-        if ([uuidStr length] != 0)
-        {
-            CFUUIDRef uuidRef = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)uuidStr);
-            if (uuidRef != NULL)
-            {
-                CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
-                if (uuidStringRef != NULL)
-                {
-                    mediaContentUUID = (NSString *)CFBridgingRelease(uuidStringRef);
-                    if ([mediaContentUUID isEqualToString:kZeroUUID])
-                    {
-                        mediaContentUUID = nil;
-                    }
-                }
-                CFRelease(uuidRef);
-            }
-        }
-    }
-    return mediaContentUUID;
 }
 
 - (NSString *)volumeUUID
@@ -306,6 +241,109 @@ static NSMutableDictionary *uniqueDisks = nil;
     return volumeNetworkPath;
 }
 
+- (NSString *)deviceMediaName
+{
+    if (deviceMediaName == nil)
+    {
+        if (self.isUSB || self.isSDCard)
+        {
+            deviceMediaName = self.parentMediaName;
+            if (nil == deviceMediaName)
+            {
+                deviceMediaName = self.mediaName;
+            }
+        }
+        else if (self.isNetwork)
+        {
+            deviceMediaName = self.volumeNetworkPath;
+        }
+    }
+    return deviceMediaName;
+}
+
+#pragma mark Public Methods
+
+- (BOOL)isEqualToDADisk:(_Nonnull DADiskRef)aDiskRef
+{
+    return self.diskRef == aDiskRef;
+}
+
+#pragma mark Private Properties
+
+- (NSDictionary *)diskDescription
+{
+    if (diskDescription == nil)
+    {
+        diskDescription = (NSDictionary *)CFBridgingRelease(DADiskCopyDescription(self.diskRef));
+    }
+    return diskDescription;
+}
+
+- (NSString *)parentMediaName
+{
+    if (self.isWholeDisk)
+    {
+        return nil;
+    }
+
+    if (parentMediaName == nil)
+    {
+        parentMediaName = self.parentDisk.mediaName;
+    }
+    return parentMediaName;
+}
+
+- (NSString *)mediaName
+{
+    if (mediaName == nil)
+    {
+        mediaName = [self.diskDescription objectForKey:(NSString *)kDADiskDescriptionMediaNameKey];
+    }
+    return mediaName;
+}
+
+- (NSString *)mediaUUID
+{
+    if (mediaUUID == nil)
+    {
+        CFUUIDRef valueRef = (__bridge CFUUIDRef)([self.diskDescription
+            objectForKey:(NSString *)kDADiskDescriptionMediaUUIDKey]);
+        if (valueRef != NULL)
+        {
+            CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, valueRef);
+            mediaUUID = CFBridgingRelease(uuidStringRef);
+        }
+    }
+    return mediaUUID;
+}
+
+- (NSString *)mediaContentUUID
+{
+    if (mediaContentUUID == nil)
+    {
+        NSString *uuidStr = [self.diskDescription
+            objectForKey:(NSString *)kDADiskDescriptionMediaContentKey];
+        if ([uuidStr length] != 0)
+        {
+            CFUUIDRef uuidRef = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)uuidStr);
+            if (uuidRef != NULL)
+            {
+                CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+                if (uuidStringRef != NULL)
+                {
+                    mediaContentUUID = (NSString *)CFBridgingRelease(uuidStringRef);
+                    if ([mediaContentUUID isEqualToString:kZeroUUID])
+                    {
+                        mediaContentUUID = nil;
+                    }
+                }
+                CFRelease(uuidRef);
+            }
+        }
+    }
+    return mediaContentUUID;
+}
+
 - (NSString *)deviceProtocol
 {
     if (deviceProtocol == nil)
@@ -338,24 +376,11 @@ static NSMutableDictionary *uniqueDisks = nil;
     return [self.volumeKind isEqualToString:@"autofs"];
 }
 
-- (NSString *)deviceMediaName
+- (BOOL)isUSB
 {
-    if (deviceMediaName == nil)
-    {
-        if (self.isUSB || self.isSDCard)
-        {
-            deviceMediaName = self.parentMediaName;
-            if (nil == deviceMediaName)
-            {
-                deviceMediaName = self.mediaName;
-            }
-        }
-        else if (self.isNetwork)
-        {
-            deviceMediaName = self.volumeNetworkPath;
-        }
-    }
-    return deviceMediaName;
+    BOOL isUSB = [self.deviceProtocol isEqualToString:
+        @kIOPropertyPhysicalInterconnectTypeUSB];
+    return isUSB;
 }
 
 - (NSInteger)mountFlags
@@ -422,36 +447,6 @@ static NSMutableDictionary *uniqueDisks = nil;
         }
     }
     return parentDisk;
-}
-
-#pragma mark -
-
-- (NSDictionary *)diskDescription
-{
-    if (diskDescription == nil)
-    {
-        diskDescription = (NSDictionary *)CFBridgingRelease(DADiskCopyDescription(self.diskRef));
-    }
-    return diskDescription;
-}
-
-- (NSString *)parentMediaName
-{
-    if (self.isWholeDisk)
-    {
-        return nil;
-    }
-
-    if (parentMediaName == nil)
-    {
-        parentMediaName = self.parentDisk.mediaName;
-    }
-    return parentMediaName;
-}
-
-- (BOOL)isEqualToDADisk:(_Nonnull DADiskRef)aDiskRef
-{
-    return self.diskRef == aDiskRef;
 }
 
 @end
