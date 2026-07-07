@@ -127,20 +127,6 @@ static NSMutableDictionary *uniqueDisks = nil;
     return value;
 }
 
-- (BOOL)isSDCard
-{
-    BOOL isSDCard = [self.deviceProtocol isEqualToString:
-        @kIOPropertyPhysicalInterconnectTypeSecureDigital];
-    return isSDCard;
-}
-
-- (BOOL)isNetwork
-{
-    BOOL value = [[self.diskDescription
-        objectForKey:(NSString *)kDADiskDescriptionVolumeNetworkKey] boolValue];
-    return value;
-}
-
 - (DiskType)type
 {
     if (self.isValidNetwork)
@@ -152,26 +138,6 @@ static NSMutableDictionary *uniqueDisks = nil;
         return DiskTypeRemovable;
     }
     return DiskTypeLocalDrive;
-}
-
-- (BOOL)isCDDVD
-{
-    return [self.mediaKind isEqualToString:@kIODVDMediaClass] ||
-        [self.mediaKind isEqualToString:@kIOCDMediaClass];
-}
-
-- (BOOL)isValidRemovable
-{
-    return self.isLeaf &&
-        (self.isUSB || self.isSDCard) &&
-        self.isMounted &&
-        ([self.deviceMediaName length] > 0) &&
-        ([self.uuid length] > 0);
-}
-
-- (BOOL)isValidNetwork
-{
-    return self.isNetwork && self.isMounted && !self.isAutoFS;
 }
 
 - (BOOL)isValidForProcessing
@@ -381,6 +347,40 @@ static NSMutableDictionary *uniqueDisks = nil;
     BOOL isUSB = [self.deviceProtocol isEqualToString:
         @kIOPropertyPhysicalInterconnectTypeUSB];
     return isUSB;
+}
+
+- (BOOL)isSDCard
+{
+    BOOL isSDCard = [self.deviceProtocol isEqualToString:
+        @kIOPropertyPhysicalInterconnectTypeSecureDigital];
+    return isSDCard;
+}
+
+- (BOOL)isNetwork
+{
+    BOOL value = [[self.diskDescription
+        objectForKey:(NSString *)kDADiskDescriptionVolumeNetworkKey] boolValue];
+    return value;
+}
+
+- (BOOL)isCDDVD
+{
+    return [self.mediaKind isEqualToString:@kIODVDMediaClass] ||
+        [self.mediaKind isEqualToString:@kIOCDMediaClass];
+}
+
+- (BOOL)isValidRemovable
+{
+    return self.isLeaf &&
+        (self.isUSB || self.isSDCard) &&
+        self.isMounted &&
+        ([self.deviceMediaName length] > 0) &&
+        ([self.uuid length] > 0);
+}
+
+- (BOOL)isValidNetwork
+{
+    return self.isNetwork && self.isMounted && !self.isAutoFS;
 }
 
 - (NSInteger)mountFlags
