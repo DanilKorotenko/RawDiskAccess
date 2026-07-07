@@ -15,17 +15,21 @@ int main(int argc, const char * argv[])
 {
     std::cout << "Hello, World!" << std::endl;
 
-    DASetLogBlock(
-        ^(const char *aLogMessage)
-        {
-            std::cout << aLogMessage << std::endl;
-        });
+//    DASetLogBlock(
+//        ^(const char *aLogMessage)
+//        {
+//            std::cout << aLogMessage << std::endl;
+//        });
 
     DASetDiskMountedBlock(
         ^(DiskRef aDisk)
         {
             std::string uuid = DiskGetUUID(aDisk);
             std::cout << uuid << std::endl;
+
+            std::string bsdName = DiskGetBsdName(aDisk);
+            std::cout << bsdName << std::endl;
+
         });
 
     DAStartListenToDiskArbitration();

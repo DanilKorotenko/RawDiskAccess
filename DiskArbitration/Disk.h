@@ -36,5 +36,6 @@ DiskType DiskGetType(DiskRef aDisk);
 std::string DiskGetUUID(DiskRef aDisk);
 std::string DiskGetVolumeMountPath(DiskRef aDisk);
 std::string DiskGetDeviceMediaName(DiskRef aDisk);
+std::string DiskGetBsdName(DiskRef aDisk);
 
 #endif // __cplusplus

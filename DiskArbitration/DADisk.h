@@ -28,6 +28,8 @@
 
 @property (readonly) NSString * _Nullable deviceMediaName;
 
+@property (readonly) NSString * _Nullable bsdName;
+
 - (_Nullable id)initWithDADisk:(_Nonnull DADiskRef)diskRef;
 
 - (BOOL)isEqualToDADisk:(_Nonnull DADiskRef)aDiskRef;

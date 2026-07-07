@@ -59,6 +59,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @synthesize deviceMediaName;
 @synthesize mountFlags;
 @synthesize parentDisk;
+@synthesize bsdName;
 
 #pragma mark -
 
@@ -225,6 +226,15 @@ static NSMutableDictionary *uniqueDisks = nil;
         }
     }
     return deviceMediaName;
+}
+
+- (NSString *)bsdName
+{
+    if (nil == bsdName)
+    {
+        bsdName = [NSString stringWithUTF8String:DADiskGetBSDName(self.diskRef)];
+    }
+    return bsdName;
 }
 
 #pragma mark Public Methods

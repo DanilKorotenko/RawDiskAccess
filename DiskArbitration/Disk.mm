@@ -112,3 +112,18 @@ DiskType DiskGetType(DiskRef aDisk)
     }
     return result;
 }
+
+std::string DiskGetBsdName(DiskRef aDisk)
+{
+    std::string result;
+    @autoreleasepool
+    {
+        if (aDisk == NULL || aDisk->_dadisk == NULL)
+        {
+            return result;
+        }
+        DADisk *daDisk = (__bridge DADisk *)aDisk->_dadisk;
+        result = GetSafeUTF8String(daDisk.bsdName);
+    }
+    return result;
+}
