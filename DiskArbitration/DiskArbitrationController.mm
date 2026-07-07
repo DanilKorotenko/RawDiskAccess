@@ -11,6 +11,7 @@
 #import <sys/mount.h>
 
 #import "DADisk.h"
+#import "DADiskManagement.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -71,12 +72,12 @@ void DiskAppearedCallback(DADiskRef diskRef, void *context)
 {
     @autoreleasepool
     {
-        NSString *volumePath = [DADisk volumePathForDisk:diskRef];
+        NSString *volumePath = [DADiskManagement volumePathForDisk:diskRef];
         if (0 != volumePath.length)
         {
             DiskArbitrationController *controller =
                 (__bridge DiskArbitrationController *)(context);
-            DADisk *disk = [DADisk uniqueDiskForDADisk:diskRef mountPath:volumePath];
+            DADisk *disk = [DADiskManagement uniqueDiskForDADisk:diskRef mountPath:volumePath];
             [controller diskMounted:disk];
         }
     }
@@ -86,7 +87,7 @@ void DiskDisappearedCallback(DADiskRef aDiskRef, void *context)
 {
     @autoreleasepool
     {
-        DADisk *disk = [DADisk extractDiskForDADisk:aDiskRef];
+        DADisk *disk = [DADiskManagement extractDiskForDADisk:aDiskRef];
         if (disk != nil)
         {
             DiskArbitrationController *controller =
@@ -108,7 +109,7 @@ void DiskDescriptionChangedCallback(DADiskRef diskRef, CFArrayRef aKeys, void *c
 
         if ([keys containsObject:(NSString *)kDADiskDescriptionVolumePathKey])
         {
-            NSString *volumePath = [DADisk volumePathForDisk:diskRef];
+            NSString *volumePath = [DADiskManagement volumePathForDisk:diskRef];
             if (volumePath.length != 0)
             {
                 // VolumePath appeared or changed

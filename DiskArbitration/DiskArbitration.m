@@ -7,6 +7,7 @@
 #import <AppKit/AppKit.h>
 #import "DiskArbitrationController.h"
 #import "DADisk.h"
+#import "DADiskManagement.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +74,7 @@ void DAEnumerateValidForProcessingDisksWithBlock(
 {
     @autoreleasepool
     {
-        [DADisk enumerateUniqueDisksWithBlock:
+        [DADiskManagement enumerateUniqueDisksWithBlock:
             ^(DADisk * _Nonnull aDisk, BOOL * _Nonnull aStop)
             {
                 if (aDisk.isValidForProcessing)
@@ -99,7 +100,7 @@ DiskRef DACopyMountPointDiskForPath(CFStringRef aPath)
         NSString *path = (__bridge NSString *)(aPath);
         if ([path length] != 0)
         {
-            DADisk *disk = [DADisk uniqueDiskForPath:path];
+            DADisk *disk = [DADiskManagement uniqueDiskForPath:path];
             if (disk != nil)
             {
                 void *daDisk = (__bridge void *)(disk);
@@ -115,7 +116,7 @@ bool DAIsAnyDiskMounted(void)
     __block bool result = false;
     @autoreleasepool
     {
-        [DADisk enumerateUniqueDisksWithBlock:
+        [DADiskManagement enumerateUniqueDisksWithBlock:
             ^(DADisk * _Nonnull aDisk, BOOL * _Nonnull aStop)
             {
                 if (aDisk.isValidForProcessing)

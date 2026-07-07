@@ -19,26 +19,28 @@ static NSMutableDictionary *uniqueDisks = nil;
 
 @interface DADisk ()
 
-@property(readonly)             NSDictionary *diskDescription;
+@property (readonly) NSDictionary *diskDescription;
 
-@property (readonly)            NSString *  parentMediaName;
-@property (readonly)            NSString *  mediaName;
-@property (readonly)            NSString *  mediaUUID;
-@property (readonly)            NSString *  mediaContentUUID;
-@property (readonly)            NSString *  deviceProtocol;
-@property (readonly)            NSString *  mediaKind;
-@property (readonly)            NSString *  volumeKind;
-@property (readonly)            BOOL        isAutoFS;
+@property (readonly) NSString *  parentMediaName;
+@property (readonly) NSString *  mediaName;
+@property (readonly) NSString *  mediaUUID;
+@property (readonly) NSString *  mediaContentUUID;
+@property (readonly) NSString *  deviceProtocol;
+@property (readonly) NSString *  mediaKind;
+@property (readonly) NSString *  volumeKind;
+@property (readonly) BOOL        isAutoFS;
 
-@property (readonly)            DADiskRef   diskRef;
+@property (readonly) DADiskRef   diskRef;
 
-@property (readonly)            BOOL        isUSB;
-@property (readonly)            BOOL        isSDCard;
+@property (readonly) BOOL        isUSB;
+@property (readonly) BOOL        isSDCard;
 
-@property (readonly)            BOOL        isValidRemovable;
-@property (readonly)            BOOL        isValidNetwork;
+@property (readonly) BOOL        isValidRemovable;
+@property (readonly) BOOL        isValidNetwork;
 
-@property (readonly)            NSInteger   mountFlags;
+@property (readonly) NSInteger   mountFlags;
+
+@property (readonly) DADisk *    parentDisk;
 
 @end
 
@@ -63,121 +65,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @synthesize volumeKind;
 @synthesize deviceMediaName;
 @synthesize mountFlags;
-
-+ (void)initialize
-{
-    if (self == [DADisk class])
-    {
-        uniqueDisks = [NSMutableDictionary dictionary];
-    }
-}
-
-#pragma mark -
-
-+ (NSString *_Nullable)volumePathForDisk:(DADiskRef)aDisk
-{
-    NSString *volumePath = nil;
-
-    CFDictionaryRef descDict = DADiskCopyDescription(aDisk);
-    if (descDict)
-    {
-        NSDictionary *diskDescription = (__bridge NSDictionary *)(descDict);
-
-        NSURL *value = [diskDescription
-            objectForKey:(NSString *)kDADiskDescriptionVolumePathKey];
-        volumePath = value.path;
-
-        CFRelease(descDict);
-    }
-
-    return volumePath;
-}
-
-+ (void)enumerateUniqueDisksWithBlock:
-    (void (^)(DADisk * _Nonnull aDisk, BOOL * _Nonnull aStop))anEnumerationBlock
-{
-    @synchronized (uniqueDisks)
-    {
-        [uniqueDisks enumerateKeysAndObjectsUsingBlock:^(
-            id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop)
-        {
-            DADisk *disk = obj;
-            anEnumerationBlock(disk, stop);
-        }];
-    }
-}
-
-#pragma mark -
-
-+ (DADisk *)extractDiskForDADisk:(DADiskRef)aDiskRef
-{
-    __block DADisk *result = nil;
-
-    @synchronized (uniqueDisks)
-    {
-        __block NSString *mountPath = nil;
-
-        [uniqueDisks enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop)
-        {
-            DADisk *disk = obj;
-
-            if (disk.diskRef == aDiskRef)
-            {
-                mountPath = (NSString *)key;
-                result = disk;
-                *stop = YES;
-            }
-        }];
-
-        if (mountPath != nil)
-        {
-            [uniqueDisks removeObjectForKey:mountPath];
-        }
-    }
-
-    return result;
-}
-
-+ (DADisk * _Nullable)uniqueDiskForPath:(NSString * _Nullable)aPath
-{
-    if (aPath == nil || aPath.length == 0)
-    {
-        return nil;
-    }
-    __block DADisk *result = nil;
-    @synchronized (uniqueDisks)
-    {
-        for (NSString *mountPath in [uniqueDisks allKeys])
-        {
-            if (![mountPath isEqualTo:@"/"])
-            {
-                if ([aPath hasPrefix:mountPath])
-                {
-                    result = [uniqueDisks objectForKey:mountPath];
-                }
-            }
-        }
-    }
-    return result;
-}
-
-+ (DADisk *)uniqueDiskForDADisk:(DADiskRef)diskRef
-    mountPath:(NSString * _Nonnull)aMountPath
-{
-    DADisk *result = nil;
-
-    @synchronized (uniqueDisks)
-    {
-        result = [uniqueDisks objectForKey:aMountPath];
-        if (result == nil)
-        {
-            result = [[DADisk alloc] initWithDADisk:diskRef];
-            [uniqueDisks setObject:result forKey:aMountPath];
-        }
-    }
-
-    return result;
-}
+@synthesize parentDisk;
 
 #pragma mark -
 
@@ -522,6 +410,20 @@ static NSMutableDictionary *uniqueDisks = nil;
     return descriptionDictionary;
 }
 
+- (DADisk *)parentDisk
+{
+    if (nil == parentDisk)
+    {
+        DADiskRef parentRef = DADiskCopyWholeDisk(self.diskRef);
+        if (parentRef)
+        {
+            parentDisk = [[DADisk alloc] initWithDADisk:parentRef];
+            CFRelease(parentRef);
+        }
+    }
+    return parentDisk;
+}
+
 #pragma mark -
 
 - (NSDictionary *)diskDescription
@@ -542,18 +444,14 @@ static NSMutableDictionary *uniqueDisks = nil;
 
     if (parentMediaName == nil)
     {
-        DADiskRef parentRef = DADiskCopyWholeDisk(self.diskRef);
-        if (parentRef)
-        {
-            NSDictionary *parentDescription =
-                (NSDictionary *)CFBridgingRelease(DADiskCopyDescription(parentRef));
-
-            parentMediaName = [parentDescription objectForKey:(NSString *)kDADiskDescriptionMediaNameKey];
-
-            CFRelease(parentRef);
-        }
+        parentMediaName = self.parentDisk.mediaName;
     }
     return parentMediaName;
+}
+
+- (BOOL)isEqualToDADisk:(_Nonnull DADiskRef)aDiskRef
+{
+    return self.diskRef == aDiskRef;
 }
 
 @end
