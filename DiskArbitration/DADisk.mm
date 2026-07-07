@@ -39,6 +39,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @property (readonly) NSString *  parentBsdName;
 
 @property (readonly) NSDictionary *ioMediaProperties;
+@property (readonly) NSInteger  offset;
 
 @end
 
@@ -68,6 +69,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @synthesize parentBsdName;
 @synthesize ioMediaProperties;
 @synthesize offset;
+@synthesize volumeSerialWin;
 
 #pragma mark -
 
@@ -236,14 +238,45 @@ static NSMutableDictionary *uniqueDisks = nil;
     return deviceMediaName;
 }
 
-- (NSInteger)offset
+- (NSString *)volumeSerialWin
 {
-    if (0 == offset)
+    if (nil == volumeSerialWin)
     {
-        NSNumber *offsetNum = [self.ioMediaProperties objectForKey:@"Base"];
-        offset = offsetNum.integerValue;
+        NSString *parentDevPath = [NSString stringWithFormat:@"/dev/%@", self.parentBsdName];
+        int fd = open(parentDevPath.UTF8String, O_RDONLY);
+        if (fd < 0)
+        {
+            return nil;
+        }
+
+        void *buffer = malloc(4);
+        if (buffer == NULL)
+        {
+            close(fd);
+            return nil;
+        }
+
+        int64_t offset = self.offset + 67;
+
+        if (lseek(fd, offset, SEEK_SET) == -1)
+        {
+            free(buffer);
+            close(fd);
+            return nil;
+        }
+
+        ssize_t bytesRead = read(fd, buffer, 4);
+        if (bytesRead > 0)
+        {
+            unsigned char* hexPtr = reinterpret_cast<unsigned char*>(buffer);
+
+            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
+        }
+
+        free(buffer);
+        close(fd);
     }
-    return offset;
+    return volumeSerialWin;
 }
 
 #pragma mark Public Methods
@@ -499,6 +532,16 @@ static NSMutableDictionary *uniqueDisks = nil;
         IOObjectRelease(io);
     }
     return ioMediaProperties;
+}
+
+- (NSInteger)offset
+{
+    if (0 == offset)
+    {
+        NSNumber *offsetNum = [self.ioMediaProperties objectForKey:@"Base"];
+        offset = offsetNum.integerValue;
+    }
+    return offset;
 }
 
 @end

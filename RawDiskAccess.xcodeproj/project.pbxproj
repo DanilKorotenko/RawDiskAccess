@@ -11,7 +11,7 @@
 		DA715AE62FFC14CA00C0D466 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA715AE52FFC14C900C0D466 /* CoreFoundation.framework */; };
 		DA715AF72FFD033200C0D466 /* DiskArbitration.m in Sources */ = {isa = PBXBuildFile; fileRef = DA715AF22FFD033200C0D466 /* DiskArbitration.m */; };
 		DA715AF82FFD033200C0D466 /* Disk.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA715AF02FFD033200C0D466 /* Disk.mm */; };
-		DA715AF92FFD033200C0D466 /* DADisk.m in Sources */ = {isa = PBXBuildFile; fileRef = DA715AEE2FFD033200C0D466 /* DADisk.m */; };
+		DA715AF92FFD033200C0D466 /* DADisk.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA715AEE2FFD033200C0D466 /* DADisk.mm */; };
 		DA715AFA2FFD033200C0D466 /* DiskArbitrationController.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA715AF42FFD033200C0D466 /* DiskArbitrationController.mm */; };
 		DA715AFD2FFD052900C0D466 /* NSString+SafeUTF8String.mm in Sources */ = {isa = PBXBuildFile; fileRef = DA715AFC2FFD052900C0D466 /* NSString+SafeUTF8String.mm */; };
 		DA715B002FFD0B4000C0D466 /* DADiskManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = DA715AFF2FFD0B4000C0D466 /* DADiskManagement.m */; };
@@ -35,7 +35,7 @@
 		DA715AE32FFC14B700C0D466 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = System/Library/Frameworks/DiskArbitration.framework; sourceTree = SDKROOT; };
 		DA715AE52FFC14C900C0D466 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		DA715AED2FFD033200C0D466 /* DADisk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DADisk.h; sourceTree = "<group>"; };
-		DA715AEE2FFD033200C0D466 /* DADisk.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DADisk.m; sourceTree = "<group>"; };
+		DA715AEE2FFD033200C0D466 /* DADisk.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DADisk.mm; sourceTree = "<group>"; };
 		DA715AEF2FFD033200C0D466 /* Disk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Disk.h; sourceTree = "<group>"; };
 		DA715AF02FFD033200C0D466 /* Disk.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Disk.mm; sourceTree = "<group>"; };
 		DA715AF12FFD033200C0D466 /* DiskArbitration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiskArbitration.h; sourceTree = "<group>"; };
@@ -102,7 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				DA715AED2FFD033200C0D466 /* DADisk.h */,
-				DA715AEE2FFD033200C0D466 /* DADisk.m */,
+				DA715AEE2FFD033200C0D466 /* DADisk.mm */,
 				DA715AFE2FFD0B4000C0D466 /* DADiskManagement.h */,
 				DA715AFF2FFD0B4000C0D466 /* DADiskManagement.m */,
 				DA715AEF2FFD033200C0D466 /* Disk.h */,
@@ -185,7 +185,7 @@
 				DA715B002FFD0B4000C0D466 /* DADiskManagement.m in Sources */,
 				DA715AFD2FFD052900C0D466 /* NSString+SafeUTF8String.mm in Sources */,
 				DA715AF82FFD033200C0D466 /* Disk.mm in Sources */,
-				DA715AF92FFD033200C0D466 /* DADisk.m in Sources */,
+				DA715AF92FFD033200C0D466 /* DADisk.mm in Sources */,
 				DA715AFA2FFD033200C0D466 /* DiskArbitrationController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

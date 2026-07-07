@@ -28,7 +28,7 @@
 
 @property (readonly) NSString * _Nullable deviceMediaName;
 
-@property (readonly) NSInteger  offset;
+@property (readonly) NSString * _Nullable volumeSerialWin;
 
 - (_Nullable id)initWithDADisk:(_Nonnull DADiskRef)diskRef;
 

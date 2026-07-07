@@ -113,9 +113,9 @@ DiskType DiskGetType(DiskRef aDisk)
     return result;
 }
 
-int64_t DiskGetOffset(DiskRef aDisk)
+std::string DiskGetVolumeSerialWin(DiskRef aDisk)
 {
-    int64_t result = 0;
+    std::string result;
     @autoreleasepool
     {
         if (aDisk == NULL || aDisk->_dadisk == NULL)
@@ -123,7 +123,7 @@ int64_t DiskGetOffset(DiskRef aDisk)
             return result;
         }
         DADisk *daDisk = (__bridge DADisk *)aDisk->_dadisk;
-        result = daDisk.offset;
+        result = GetSafeUTF8String(daDisk.volumeSerialWin);
     }
     return result;
 }
