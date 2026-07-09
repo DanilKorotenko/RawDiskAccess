@@ -270,7 +270,7 @@ static NSMutableDictionary *uniqueDisks = nil;
         {
             unsigned char* hexPtr = reinterpret_cast<unsigned char*>(buffer);
 
-            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
+            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X-%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
         }
 
         free(buffer);
