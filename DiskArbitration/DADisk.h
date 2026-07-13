@@ -16,8 +16,6 @@
 
 @property (readonly) BOOL isValidForProcessing;
 
-@property (readonly) NSString * _Nullable volumeUUID;
-
 // The custom property that returns volume UUID by default.
 // But if volume UUID is empty, and this volume is NTFS,
 // the property returns media UUID.

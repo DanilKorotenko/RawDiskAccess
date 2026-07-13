@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 static NSString *const kZeroUUID = @"00000000-0000-0000-0000-000000000000";
 static NSMutableDictionary *uniqueDisks = nil;
+static NSInteger const kVolumeSerialOffset = 67;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +26,7 @@ static NSMutableDictionary *uniqueDisks = nil;
 @property (readonly) NSString *  mediaName;
 @property (readonly) NSString *  mediaUUID;
 @property (readonly) NSString *  mediaContentUUID;
+@property (readonly) NSString * _Nullable volumeUUID;
 @property (readonly) NSString *  deviceProtocol;
 @property (readonly) NSString *  mediaKind;
 @property (readonly) NSString *  volumeKind;
@@ -175,7 +177,11 @@ static NSMutableDictionary *uniqueDisks = nil;
 {
     if (uuid == nil)
     {
-        uuid = self.volumeUUID;
+        uuid = self.volumeSerialWin;
+        if ([uuid length] == 0)
+        {
+            uuid = self.volumeUUID;
+        }
         if ([uuid length] == 0)
         {
             uuid = self.mediaUUID;
@@ -238,6 +244,14 @@ static NSMutableDictionary *uniqueDisks = nil;
     return deviceMediaName;
 }
 
+/*
+With FAT32 volumes, the Volume Serial Number is stored in the Boot Sector at offset 67 (0x43), and is four bytes long.
+https://apple.stackexchange.com/questions/408562/how-can-i-get-the-volume-serial-number-of-a-fat-volume
+https://www.digital-detective.net/documents/Volume%20Serial%20Numbers.pdf
+
+In this method, we read root dev, and offseting to this partition. We cannot directly read from this partition device,
+because it is mounted and always busy.
+*/
 - (NSString *)volumeSerialWin
 {
     if (nil == volumeSerialWin)
@@ -256,7 +270,7 @@ static NSMutableDictionary *uniqueDisks = nil;
             return nil;
         }
 
-        int64_t offset = self.offset + 67;
+        int64_t offset = self.offset + kVolumeSerialOffset;
 
         if (lseek(fd, offset, SEEK_SET) == -1)
         {
@@ -270,7 +284,7 @@ static NSMutableDictionary *uniqueDisks = nil;
         {
             unsigned char* hexPtr = reinterpret_cast<unsigned char*>(buffer);
 
-            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X-%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
+            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
         }
 
         free(buffer);
