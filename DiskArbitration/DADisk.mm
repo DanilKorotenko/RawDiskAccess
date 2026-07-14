@@ -259,10 +259,14 @@ because it is mounted and always busy.
         int fd = open(parentDevPath.UTF8String, O_RDONLY);
         if (fd < 0)
         {
+            NSString *error = [NSString stringWithUTF8String:strerror(errno)];
+            NSLog(@"%@", error);
             return nil;
         }
 
-        void *buffer = malloc(4);
+        int64_t bytesToRead = self.volumeSerialNumberLength;
+
+        void *buffer = malloc(bytesToRead);
         if (buffer == NULL)
         {
             close(fd);
@@ -278,12 +282,19 @@ because it is mounted and always busy.
             return nil;
         }
 
-        ssize_t bytesRead = read(fd, buffer, 4);
+        ssize_t bytesRead = read(fd, buffer, bytesToRead);
         if (bytesRead > 0)
         {
             unsigned char* hexPtr = reinterpret_cast<unsigned char*>(buffer);
 
-            volumeSerialWin = [NSString stringWithFormat:@"%02X%02X%02X%02X", hexPtr[3], hexPtr[2], hexPtr[1], hexPtr[0]];
+            NSMutableString *serial = [NSMutableString string];
+
+            for (int64_t i = bytesRead-1; i >= 0; i--)
+            {
+                [serial appendFormat:@"%02X", hexPtr[i]];
+            }
+
+            volumeSerialWin = [NSString stringWithString:serial];
         }
 
         free(buffer);
@@ -576,6 +587,22 @@ https://ntfs.com/ntfs-partition-boot-sector.htm
     }
     NSNumber *offsetNum = offsets[self.volumeKind];
     return offsetNum != nil ? offsetNum.integerValue : 0; ;
+}
+
+- (NSInteger)volumeSerialNumberLength
+{
+    static NSDictionary *lengths = nil;
+    if (lengths == nil)
+    {
+        lengths = @{
+            @"exfat": @4,
+            @"fat32": @4, // FAT32
+            @"msdos": @4, // FAT32
+            @"ntfs" : @8
+        };
+    }
+    NSNumber *lengthNum = lengths[self.volumeKind];
+    return lengthNum != nil ? lengthNum.integerValue : 0; ;
 }
 
 @end
