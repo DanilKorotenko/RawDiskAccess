@@ -14,7 +14,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 static NSString *const kZeroUUID = @"00000000-0000-0000-0000-000000000000";
 static NSMutableDictionary *uniqueDisks = nil;
-static NSInteger const kVolumeSerialOffset = 67;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -270,7 +269,7 @@ because it is mounted and always busy.
             return nil;
         }
 
-        int64_t offset = self.offset + kVolumeSerialOffset;
+        int64_t offset = self.offset + self.volumeSerialNumberOffset;
 
         if (lseek(fd, offset, SEEK_SET) == -1)
         {
@@ -556,6 +555,27 @@ because it is mounted and always busy.
         offset = offsetNum.integerValue;
     }
     return offset;
+}
+
+/*
+https://elm-chan.org/docs/exfat_e.html
+https://elm-chan.org/docs/fat_e.html
+https://ntfs.com/ntfs-partition-boot-sector.htm
+*/
+- (NSInteger)volumeSerialNumberOffset
+{
+    static NSDictionary *offsets = nil;
+    if (offsets == nil)
+    {
+        offsets = @{
+            @"exfat": @100,
+            @"fat32": @67, // FAT32
+            @"msdos": @67, // FAT32
+            @"ntfs" : @72
+        };
+    }
+    NSNumber *offsetNum = offsets[self.volumeKind];
+    return offsetNum != nil ? offsetNum.integerValue : 0; ;
 }
 
 @end
